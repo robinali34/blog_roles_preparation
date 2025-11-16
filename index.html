@@ -1,0 +1,71 @@
+---
+layout: default
+---
+
+<div class="home">
+  <!-- Hero Section -->
+  <section class="blog-hero">
+    <div class="hero-content">
+      <h1 class="hero-title">{{ site.title | default: "Robina Li" }}</h1>
+      <p class="hero-subtitle">{{ site.description | default: "Roles Preparation Blog" }}</p>
+      <div class="hero-description-block">
+        <p class="hero-description">Interview preparation guides, role breakdowns, and career development resources</p>
+      </div>
+    </div>
+  </section>
+
+  {%- if site.posts.size > 0 -%}
+    <!-- Latest Posts Section -->
+    <section class="blog-posts">
+      <div class="section-header">
+        <h2 class="section-title">Latest Posts</h2>
+        <a href="{{ "/posts/" | relative_url }}" class="view-all-link">View All →</a>
+      </div>
+
+      <div class="posts-timeline">
+        {%- assign recent_posts = site.posts | limit: 10 -%}
+        {%- for post in recent_posts -%}
+        <article class="blog-post-item">
+          {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+          <div class="post-date">{{ post.date | date: date_format }}</div>
+          <div class="post-content-wrapper">
+            <h3 class="post-title">
+              <a class="post-link" href="{{ post.url | relative_url }}">
+                {{ post.title | escape }}
+              </a>
+            </h3>
+            {%- if post.excerpt -%}
+              <div class="post-excerpt">{{ post.excerpt | strip_html | truncatewords: 35 }}</div>
+            {%- endif -%}
+            {%- if post.categories -%}
+              <div class="post-categories">
+                {%- for category in post.categories -%}
+                  <a href="{{ "/posts/" | relative_url }}?category={{ category | downcase }}" class="category-tag">{{ category }}</a>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+            <a href="{{ post.url | relative_url }}" class="read-more">Read more →</a>
+          </div>
+        </article>
+        {%- endfor -%}
+      </div>
+    </section>
+
+    <!-- Categories Grid -->
+    <section class="blog-categories">
+      <div class="section-header">
+        <h2 class="section-title">Browse by Category</h2>
+      </div>
+      <div class="categories-grid">
+        {%- assign all_categories = site.posts | map: 'categories' | flatten | uniq | sort -%}
+        {%- for category in all_categories limit: 12 -%}
+        <a href="{{ "/posts/" | relative_url }}?category={{ category | downcase }}" class="category-card">
+          <span class="category-name">{{ category }}</span>
+          <span class="category-count">{{ site.posts | where_exp: "post", "post.categories contains category" | size }} posts</span>
+        </a>
+        {%- endfor -%}
+      </div>
+    </section>
+  {%- endif -%}
+</div>
+

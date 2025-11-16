@@ -1,0 +1,63 @@
+# Site settings
+title: "Robina Li"
+description: "Roles Preparation Blog - Interview preparation guides, role breakdowns, and career development resources"
+baseurl: "/blog_roles_preparation" # the subpath of your site, e.g. /blog_roles_preparation
+url: "https://robinali34.github.io/blog_roles_preparation/" # the base hostname & protocol for your site
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+show_excerpts: true
+
+# Permalinks for posts (baseurl is automatically prepended)
+permalink: /:year/:month/:day/:title/
+
+# Pagination
+paginate: 10
+paginate_path: "/blog_roles_preparation/posts/page:num/"
+
+# Defaults
+defaults:
+  - scope:
+      path: "_posts"
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-paginate
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - README.md
+
+# Navigation
+header_pages:
+  - about.md
+
+# Social links
+github_username: robinali34
+linkedin_username: robinali
+
+# Author information
+email: "robinali34@gmail.com"
+# author:
+#   name: "Robina Li"
+#   email: "robinali34@gmail.com"
+#   description: "Passionate about algorithms, data structures, and software engineering. Sharing knowledge and helping others understand complex technical topics."
+

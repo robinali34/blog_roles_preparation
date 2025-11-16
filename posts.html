@@ -1,0 +1,244 @@
+---
+layout: default
+title: "All Posts"
+permalink: /posts/
+---
+
+<div class="posts">
+  <header class="post-header">
+    <h1 class="post-title">All Posts</h1>
+    <p class="post-description">Browse all posts by category or search by title</p>
+  </header>
+
+  {%- if site.posts.size > 0 -%}
+    <!-- Category Filter Menu -->
+    <div class="category-filter-section">
+      <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search posts by title or category...">
+      </div>
+      
+      <div class="category-hierarchy">
+        <button class="filter-btn active" data-category="all" data-level="0">All</button>
+        
+        <!-- Interview Preparation -->
+        <div class="category-group">
+          <button class="category-parent" data-parent="interview-preparation">Interview Prep ▾</button>
+          <div class="category-children dropdown-panel" data-parent="interview-preparation">
+            <button class="filter-btn" data-category="interview preparation" data-level="1" data-parent="interview-preparation">All</button>
+            <button class="filter-btn" data-category="hiring manager interview" data-level="1" data-parent="interview-preparation">HM Interview</button>
+            <button class="filter-btn" data-category="technical interview" data-level="1" data-parent="interview-preparation">Technical</button>
+            <button class="filter-btn" data-category="behavioral interview" data-level="1" data-parent="interview-preparation">Behavioral</button>
+            <button class="filter-btn" data-category="system design" data-level="1" data-parent="interview-preparation">System Design</button>
+          </div>
+        </div>
+        
+        <!-- Career Development -->
+        <div class="category-group">
+          <button class="category-parent" data-parent="career">Career ▾</button>
+          <div class="category-children dropdown-panel" data-parent="career">
+            <button class="filter-btn" data-category="career" data-level="1" data-parent="career">All</button>
+            <button class="filter-btn" data-category="role breakdown" data-level="1" data-parent="career">Role Breakdown</button>
+            <button class="filter-btn" data-category="career development" data-level="1" data-parent="career">Development</button>
+            <button class="filter-btn" data-category="job search" data-level="1" data-parent="career">Job Search</button>
+          </div>
+        </div>
+        
+        <!-- Company-Specific -->
+        <div class="category-group">
+          <button class="category-parent" data-parent="companies">Companies ▾</button>
+          <div class="category-children dropdown-panel" data-parent="companies">
+            <button class="filter-btn" data-category="roblox" data-level="1" data-parent="companies">Roblox</button>
+            <button class="filter-btn" data-category="meta" data-level="1" data-parent="companies">Meta</button>
+            <button class="filter-btn" data-category="google" data-level="1" data-parent="companies">Google</button>
+            <button class="filter-btn" data-category="amazon" data-level="1" data-parent="companies">Amazon</button>
+          </div>
+        </div>
+        
+        <!-- Other Categories -->
+        {%- assign all_categories = site.posts | map: 'categories' | flatten | uniq | sort -%}
+        {%- assign main_categories = "Interview Preparation,Interview Prep,Hiring Manager Interview,Technical Interview,Behavioral Interview,System Design,Career,Role Breakdown,Career Development,Job Search,Roblox,Meta,Google,Amazon" | split: "," -%}
+        {%- assign other_categories = "" | split: "" -%}
+        {%- for category in all_categories -%}
+          {%- assign is_main = false -%}
+          {%- for main_cat in main_categories -%}
+            {%- if category == main_cat or category contains main_cat or main_cat contains category -%}
+              {%- assign is_main = true -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {%- unless is_main -%}
+            {%- assign other_categories = other_categories | push: category -%}
+          {%- endunless -%}
+        {%- endfor -%}
+        
+        {%- if other_categories.size > 0 -%}
+        <div class="category-group">
+          <button class="category-parent" data-parent="other">Other ▾</button>
+          <div class="category-children dropdown-panel" data-parent="other">
+            {%- for category in other_categories -%}
+              <button class="filter-btn" data-category="{{ category | downcase }}" data-level="1" data-parent="other">{{ category }}</button>
+            {%- endfor -%}
+          </div>
+        </div>
+        {%- endif -%}
+      </div>
+      
+      <div class="search-results-info" id="results-info"></div>
+    </div>
+
+    <ul class="post-list" id="post-list">
+      {%- for post in site.posts -%}
+      <li class="post-item" 
+          data-categories="{%- if post.categories -%}{%- for category in post.categories -%}{{ category | downcase }} {%- endfor -%}{%- endif -%}"
+          data-title="{{ post.title | downcase }}">
+        {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+        <span class="post-meta">{{ post.date | date: date_format }}</span>
+        <h3>
+          <a class="post-link" href="{{ post.url | relative_url }}">
+            {{ post.title | escape }}
+          </a>
+        </h3>
+        {%- if post.excerpt -%}
+          <div class="post-excerpt">{{ post.excerpt | strip_html | truncatewords: 30 }}</div>
+        {%- endif -%}
+        {%- if post.categories -%}
+          <div class="post-categories">
+            {%- for category in post.categories -%}
+              <span class="category-tag" data-category="{{ category | downcase }}">{{ category }}</span>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+</div>
+
+<script>
+(function() {
+  const searchInput = document.getElementById('search-input');
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const categoryParents = document.querySelectorAll('.category-parent');
+  const postItems = document.querySelectorAll('.post-item');
+  const resultsInfo = document.getElementById('results-info');
+  
+  let currentCategory = 'all';
+  let currentSearch = '';
+  
+  function filterPosts() {
+    let visibleCount = 0;
+    
+    postItems.forEach(item => {
+      const categories = (item.getAttribute('data-categories') || '').toLowerCase();
+      const title = (item.getAttribute('data-title') || '').toLowerCase();
+      const searchCategory = currentCategory.toLowerCase();
+      
+      // Check if category matches (handles partial matches and spaces)
+      const matchesCategory = currentCategory === 'all' || 
+                             categories.includes(searchCategory) ||
+                             categories.split(' ').some(cat => cat.includes(searchCategory) || searchCategory.includes(cat));
+      
+      const matchesSearch = currentSearch === '' || 
+                           title.includes(currentSearch.toLowerCase()) ||
+                           categories.includes(currentSearch.toLowerCase());
+      
+      if (matchesCategory && matchesSearch) {
+        item.style.display = 'block';
+        visibleCount++;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+    
+    // Update results info
+    if (currentCategory !== 'all' || currentSearch !== '') {
+      resultsInfo.textContent = `Showing ${visibleCount} of ${postItems.length} posts`;
+      resultsInfo.style.display = 'block';
+    } else {
+      resultsInfo.style.display = 'none';
+    }
+  }
+  
+  // Category parent buttons (expand/collapse)
+  categoryParents.forEach(parent => {
+    parent.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const parentId = this.getAttribute('data-parent');
+      const children = document.querySelector(`.category-children[data-parent="${parentId}"]`);
+      
+      // Close other open dropdowns
+      document.querySelectorAll('.category-children').forEach(child => {
+        if (child !== children) {
+          child.style.display = 'none';
+          const otherParent = document.querySelector(`.category-parent[data-parent="${child.getAttribute('data-parent')}"]`);
+          if (otherParent) {
+            otherParent.textContent = otherParent.textContent.replace('▴', '▾');
+            otherParent.classList.remove('expanded');
+          }
+        }
+      });
+      
+      // Toggle children visibility
+      if (children.style.display === 'none' || !children.style.display) {
+        children.style.display = 'grid';
+        this.textContent = this.textContent.replace('▾', '▴');
+        this.classList.add('expanded');
+      } else {
+        children.style.display = 'none';
+        this.textContent = this.textContent.replace('▴', '▾');
+        this.classList.remove('expanded');
+      }
+    });
+  });
+  
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.category-group')) {
+      document.querySelectorAll('.category-children').forEach(children => {
+        children.style.display = 'none';
+        const parent = document.querySelector(`.category-parent[data-parent="${children.getAttribute('data-parent')}"]`);
+        if (parent) {
+          parent.textContent = parent.textContent.replace('▴', '▾');
+          parent.classList.remove('expanded');
+        }
+      });
+    }
+  });
+  
+  // Category filter buttons
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      
+      // Remove active from all buttons
+      filterButtons.forEach(b => b.classList.remove('active'));
+      
+      // Add active to clicked button
+      this.classList.add('active');
+      
+      // Set current category
+      currentCategory = this.getAttribute('data-category');
+      
+      // Filter posts
+      filterPosts();
+    });
+  });
+  
+  // Search input
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      currentSearch = this.value.trim();
+      filterPosts();
+    });
+  }
+  
+  // Initialize - collapse all category groups
+  document.querySelectorAll('.category-children').forEach(children => {
+    children.style.display = 'none';
+  });
+  
+  // Initialize filter
+  filterPosts();
+})();
+</script>
+
